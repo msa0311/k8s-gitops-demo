@@ -38,7 +38,9 @@ spec:
         - name: AD_SERVICE_ADDR
           value: "adservice:9555"
         - name: SHOPPING_ASSISTANT_SERVICE_ADDR
-          value: ""
+          value: "disabled"
+        - name: ENABLE_ASSISTANT
+          value: "false"
         resources:
           requests:
             cpu: 100m
