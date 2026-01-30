@@ -3,11 +3,13 @@ kind: Application
 metadata:
   name: tailscale
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
     repoURL: https://github.com/msa0311/k8s-gitops-demo.git
-    targetRevision: main
+    targetRevision: HEAD
     path: infrastructure/tailscale
   destination:
     server: https://kubernetes.default.svc
@@ -17,4 +19,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
