@@ -24,7 +24,7 @@ spec:
         command: ['sh', '-c', 'until nc -z frontend 80; do echo waiting for frontend; sleep 2; done;']
       containers:
       - name: main
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.10.4
+        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/loadgenerator:v0.10.4
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"

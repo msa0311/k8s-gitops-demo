@@ -17,7 +17,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/frontend:v0.10.4
+        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.4
         ports:
         - containerPort: 8080
         env:
