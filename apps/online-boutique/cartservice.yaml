@@ -16,7 +16,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/cartservice:v0.10.4
+        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/cartservice:v0.10.4
         ports:
         - containerPort: 7070
         env:
