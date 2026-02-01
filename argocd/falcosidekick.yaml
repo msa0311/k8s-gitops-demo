@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: falcosidekick
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://falcosecurity.github.io/charts
+    chart: falcosidekick
+    targetRevision: 0.7.*
+    helm:
+      valuesObject:
+        # Resource limits for minikube
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        
+        config:
+          # Slack integration (uncomment and add webhook URL)
+          # slack:
+          #   webhookurl: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+          #   channel: "#security-alerts"
+          #   username: "Falco"
+          #   icon: "https://falco.org/img/favicon.png"
+          #   minimumpriority: "warning"
+          #   messageformat: "Alert: {{ .Rule }} - {{ .Output }}"
+          
+          # Webhook for custom integrations
+          webhook:
+            address: ""
+            minimumpriority: "warning"
+          
+          # Debug/testing - log all alerts
+          debug: true
+        
+        # Web UI for viewing alerts
+        webui:
+          enabled: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: falco
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
