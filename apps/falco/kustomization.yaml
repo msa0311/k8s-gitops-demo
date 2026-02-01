@@ -5,6 +5,4 @@ namespace: falco
 
 resources:
   - namespace.yaml
-  - falco-helm.yaml
-  - falcosidekick-helm.yaml
   - custom-rules.yaml

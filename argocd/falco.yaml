@@ -1,16 +1,57 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: falco-security
+  name: falco
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/msa0311/k8s-gitops-demo.git
-    targetRevision: main
-    path: apps/falco
+    repoURL: https://falcosecurity.github.io/charts
+    chart: falco
+    targetRevision: 4.*
+    helm:
+      valuesObject:
+        # Use modern eBPF driver (no kernel headers needed)
+        driver:
+          kind: modern_ebpf
+        
+        # Falco configuration
+        falco:
+          grpc:
+            enabled: true
+          grpcOutput:
+            enabled: true
+          jsonOutput: true
+          jsonIncludeOutputProperty: true
+          httpOutput:
+            enabled: true
+            url: "http://falcosidekick.falco.svc.cluster.local:2801"
+        
+        # Resource limits for minikube
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        
+        # Enable default rules
+        falcoctl:
+          artifact:
+            install:
+              enabled: true
+            follow:
+              enabled: true
+          config:
+            artifact:
+              install:
+                refs:
+                  - falco-rules:latest
+                  - falco-incubating-rules:latest
+                  - falco-sandbox-rules:latest
   destination:
     server: https://kubernetes.default.svc
     namespace: falco
@@ -20,5 +61,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - PruneLast=true
       - ServerSideApply=true
