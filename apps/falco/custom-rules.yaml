@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-custom-rules
+  namespace: falco
+data:
+  custom-rules.yaml: |
+    # ===========================================
+    # Custom Falco Rules for Online Boutique
+    # ===========================================
+    
+    # ------------------------------------------
+    # CRITICAL: Shell Access Detection
+    # ------------------------------------------
+    - rule: Shell Spawned in Online Boutique Container
+      desc: Detect shell spawned in any online-boutique namespace container
+      condition: >
+        spawned_process and
+        shell_procs and
+        k8s.ns.name = "online-boutique"
+      output: >
+        CRITICAL: Shell spawned in Online Boutique
+        (user=%user.name user_loginuid=%user.loginuid command=%proc.cmdline
+        pod=%k8s.pod.name container=%container.name namespace=%k8s.ns.name
+        image=%container.image.repository)
+      priority: CRITICAL
+      tags: [shell, online-boutique, mitre_execution]
+    
+    # ------------------------------------------
+    # HIGH: Sensitive File Access
+    # ------------------------------------------
+    - rule: Sensitive File Access in Container
+      desc: Detect access to sensitive files like /etc/shadow, /etc/passwd
+      condition: >
+        open_read and
+        container and
+        (fd.name startswith /etc/shadow or
+         fd.name startswith /etc/passwd or
+         fd.name startswith /etc/kubernetes)
+      output: >
+        HIGH: Sensitive file accessed in container
+        (user=%user.name command=%proc.cmdline file=%fd.name
+        pod=%k8s.pod.name container=%container.name namespace=%k8s.ns.name)
+      priority: HIGH
+      tags: [filesystem, sensitive_files, mitre_credential_access]
+    
+    # ------------------------------------------
+    # HIGH: Crypto Mining Detection
+    # ------------------------------------------
+    - rule: Crypto Mining Indicators
+      desc: Detect potential crypto mining activity
+      condition: >
+        spawned_process and
+        container and
+        (proc.name in (xmrig, minerd, cpuminer, cgminer, bfgminer) or
+         proc.cmdline contains "stratum+tcp" or
+         proc.cmdline contains "pool." or
+         proc.cmdline contains "nicehash")
+      output: >
+        CRITICAL: Potential crypto mining detected
+        (user=%user.name command=%proc.cmdline
+        pod=%k8s.pod.name container=%container.name namespace=%k8s.ns.name)
+      priority: CRITICAL
+      tags: [cryptomining, mitre_resource_hijacking]
+    
+    # ------------------------------------------
+    # MEDIUM: Unexpected Network Tools
+    # ------------------------------------------
+    - rule: Network Reconnaissance Tools in Container
+      desc: Detect network scanning or reconnaissance tools
+      condition: >
+        spawned_process and
+        container and
+        proc.name in (nmap, nc, netcat, ncat, socat, tcpdump, tshark, masscan)
+      output: >
+        WARNING: Network reconnaissance tool executed
+        (user=%user.name command=%proc.cmdline
+        pod=%k8s.pod.name container=%container.name namespace=%k8s.ns.name)
+      priority: WARNING
+      tags: [network, reconnaissance, mitre_discovery]
+    
+    # ------------------------------------------
+    # MEDIUM: Package Manager in Running Container
+    # ------------------------------------------
+    - rule: Package Manager Executed in Container
+      desc: Detect package managers running in containers (potential persistence)
+      condition: >
+        spawned_process and
+        container and
+        proc.name in (apt, apt-get, yum, dnf, apk, pip, pip3, npm, gem)
+      output: >
+        WARNING: Package manager executed in container
+        (user=%user.name command=%proc.cmdline
+        pod=%k8s.pod.name container=%container.name namespace=%k8s.ns.name)
+      priority: WARNING
+      tags: [package_manager, persistence, mitre_persistence]
+    
+    # ------------------------------------------
+    # HIGH: Kubernetes API Access from Container
+    # ------------------------------------------
+    - rule: Unexpected K8s API Access
+      desc: Detect containers accessing Kubernetes API (except expected ones)
+      condition: >
+        outbound and
+        container and
+        fd.sip = "10.96.0.1" and
+        not k8s.ns.name in (kube-system, argocd, falco, trivy-system)
+      output: >
+        HIGH: Container accessing Kubernetes API
+        (pod=%k8s.pod.name container=%container.name namespace=%k8s.ns.name
+        connection=%fd.name)
+      priority: HIGH
+      tags: [kubernetes, api_access, mitre_discovery]
+    
+    # ------------------------------------------
+    # CRITICAL: Container Escape Attempts
+    # ------------------------------------------
+    - rule: Container Escape via Mount
+      desc: Detect attempts to mount host filesystem
+      condition: >
+        container and
+        evt.type = mount and
+        evt.arg.source startswith "/host"
+      output: >
+        CRITICAL: Potential container escape via mount
+        (user=%user.name command=%proc.cmdline
+        pod=%k8s.pod.name container=%container.name namespace=%k8s.ns.name)
+      priority: CRITICAL
+      tags: [container_escape, mitre_privilege_escalation]
+    
+    # ------------------------------------------
+    # HIGH: Reverse Shell Detection
+    # ------------------------------------------
+    - rule: Reverse Shell Detected
+      desc: Detect potential reverse shell connections
+      condition: >
+        spawned_process and
+        container and
+        ((proc.name = bash and proc.cmdline contains "/dev/tcp") or
+         (proc.name = sh and proc.cmdline contains "/dev/tcp") or
+         (proc.cmdline contains "bash -i" and fd.type = ipv4))
+      output: >
+        CRITICAL: Potential reverse shell detected
+        (user=%user.name command=%proc.cmdline
+        pod=%k8s.pod.name container=%container.name namespace=%k8s.ns.name)
+      priority: CRITICAL
+      tags: [reverse_shell, mitre_command_and_control]

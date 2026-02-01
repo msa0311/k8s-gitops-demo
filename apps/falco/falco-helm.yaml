@@ -1,0 +1,69 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: falcosecurity
+  namespace: falco
+spec:
+  interval: 1h
+  url: https://falcosecurity.github.io/charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: falco
+  namespace: falco
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: falco
+      version: "4.x"
+      sourceRef:
+        kind: HelmRepository
+        name: falcosecurity
+        namespace: falco
+  values:
+    # Use modern eBPF driver (no kernel headers needed)
+    driver:
+      kind: modern_ebpf
+    
+    # Falco configuration
+    falco:
+      grpc:
+        enabled: true
+      grpcOutput:
+        enabled: true
+      jsonOutput: true
+      jsonIncludeOutputProperty: true
+      httpOutput:
+        enabled: true
+        url: "http://falcosidekick.falco.svc.cluster.local:2801"
+      
+    # Resource limits for minikube
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    
+    # Enable default rules
+    falcoctl:
+      artifact:
+        install:
+          enabled: true
+        follow:
+          enabled: true
+      config:
+        artifact:
+          install:
+            refs:
+              - falco-rules:latest
+              - falco-incubating-rules:latest
+              - falco-sandbox-rules:latest
+    
+    # Custom rules from ConfigMap
+    customRules:
+      custom-rules.yaml: |
+        # Loaded from custom-rules ConfigMap

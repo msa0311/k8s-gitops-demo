@@ -1,0 +1,55 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: falcosidekick
+  namespace: falco
+spec:
+  interval: 1h
+  dependsOn:
+    - name: falco
+  chart:
+    spec:
+      chart: falcosidekick
+      version: "0.7.x"
+      sourceRef:
+        kind: HelmRepository
+        name: falcosecurity
+        namespace: falco
+  values:
+    # Resource limits for minikube
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+    
+    config:
+      # Slack integration (uncomment and add webhook URL)
+      # slack:
+      #   webhookurl: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+      #   channel: "#security-alerts"
+      #   username: "Falco"
+      #   icon: "https://falco.org/img/favicon.png"
+      #   minimumpriority: "warning"
+      #   messageformat: "Alert: {{ .Rule }} - {{ .Output }}"
+      
+      # Webhook for custom integrations
+      webhook:
+        address: ""
+        minimumpriority: "warning"
+      
+      # Debug/testing - log all alerts
+      debug: true
+    
+    # Web UI for viewing alerts
+    webui:
+      enabled: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 50m
+          memory: 64Mi
