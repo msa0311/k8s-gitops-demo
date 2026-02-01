@@ -32,15 +32,26 @@ spec:
             memory: 220Mi
           limits:
             cpu: 200m
-            memory: 450Mi
+            memory: 512Mi  # Increased from 450Mi - Python ML libs need memory
+        # Startup probe: allows up to 60s for Python imports before liveness kicks in
+        startupProbe:
+          grpc:
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 12  # 5 + (5 * 12) = 65s max startup time
         readinessProbe:
-          periodSeconds: 5
           grpc:
             port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
         livenessProbe:
-          periodSeconds: 5
           grpc:
             port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
