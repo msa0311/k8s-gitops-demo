@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://falcosecurity.github.io/charts
     chart: falco
-    targetRevision: 4.*
+    targetRevision: 5.*
     helm:
       valuesObject:
         # Use modern eBPF driver (no kernel headers needed)
@@ -20,8 +20,6 @@ spec:
         # Falco configuration
         falco:
           grpc:
-            enabled: true
-          grpcOutput:
             enabled: true
           jsonOutput: true
           jsonIncludeOutputProperty: true
