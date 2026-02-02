@@ -13,6 +13,10 @@ spec:
     targetRevision: 5.*
     helm:
       valuesObject:
+        # Pin to Falco 0.43.1 for kernel compatibility
+        image:
+          tag: "0.43.1"
+        
         # Use modern eBPF driver (no kernel headers needed)
         driver:
           kind: modern_ebpf
@@ -36,20 +40,14 @@ spec:
             cpu: 500m
             memory: 512Mi
         
-        # Enable default rules
+        # Disable artifact download - use bundled rules
+        # This removes the flaky init container that times out on DNS
         falcoctl:
           artifact:
             install:
-              enabled: true
+              enabled: false
             follow:
-              enabled: true
-          config:
-            artifact:
-              install:
-                refs:
-                  - falco-rules:latest
-                  - falco-incubating-rules:latest
-                  - falco-sandbox-rules:latest
+              enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: falco
