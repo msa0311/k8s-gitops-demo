@@ -13,9 +13,9 @@ spec:
     targetRevision: 5.*
     helm:
       valuesObject:
-        # Pin to Falco 0.43.1 for kernel compatibility
+        # Pin to Falco 0.43.0 (latest stable release)
         image:
-          tag: "0.43.1"
+          tag: "0.43.0"
         
         # Use modern eBPF driver (no kernel headers needed)
         driver:
