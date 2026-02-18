@@ -30,6 +30,9 @@ spec:
           httpOutput:
             enabled: true
             url: "http://falcosidekick.falco.svc.cluster.local:2801"
+          # Disable external plugin loading - container plugin is compiled-in
+          # Loading it externally causes: "a plugin with name 'container' is already loaded"
+          load_plugins: []
         
         # Resource limits for minikube
         resources:
