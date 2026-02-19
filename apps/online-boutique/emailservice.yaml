@@ -45,8 +45,10 @@ metadata:
   name: emailservice
   namespace: online-boutique
 spec:
+  type: ClusterIP
   selector:
     app: emailservice
   ports:
-  - port: 5000
+  - name: grpc
+    port: 5000
     targetPort: 8080
