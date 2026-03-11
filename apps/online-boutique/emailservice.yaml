@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/part-of: online-boutique
     app.kubernetes.io/component: backend
 spec:
-  replicas: 2
+  replicas: 3
   revisionHistoryLimit: 5
   strategy:
     type: RollingUpdate
@@ -28,7 +28,7 @@ spec:
         app.kubernetes.io/component: backend
     spec:
       serviceAccountName: emailservice
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 45
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -89,6 +89,10 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 10
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
           volumeMounts:
             - name: tmp
               mountPath: /tmp
