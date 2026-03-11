@@ -8,6 +8,9 @@ metadata:
     app.kubernetes.io/name: emailservice
     app.kubernetes.io/part-of: online-boutique
     app.kubernetes.io/component: backend
+    app.kubernetes.io/version: v0.10.4
+  annotations:
+    app.kubernetes.io/managed-by: gitops
 spec:
   replicas: 3
   revisionHistoryLimit: 5
@@ -25,7 +28,12 @@ spec:
         app: emailservice
         app.kubernetes.io/name: emailservice
         app.kubernetes.io/part-of: online-boutique
-        app.kubernetes.io/component: backend
+        app.kubernetes.io/component: messaging
+        app.kubernetes.io/version: v0.10.4
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: emailservice
       terminationGracePeriodSeconds: 45
@@ -39,7 +47,7 @@ spec:
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
               app: emailservice
@@ -55,13 +63,17 @@ spec:
               value: "8080"
             - name: DISABLE_PROFILER
               value: "1"
+            - name: GOMAXPROCS
+              value: "2"
           resources:
             requests:
-              cpu: 100m
-              memory: 64Mi
-            limits:
               cpu: 200m
-              memory: 128Mi
+              memory: 256Mi
+              ephemeral-storage: 64Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+              ephemeral-storage: 128Mi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -72,15 +84,15 @@ spec:
             grpc:
               port: 8080
             initialDelaySeconds: 5
-            periodSeconds: 5
+            periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
             successThreshold: 1
           livenessProbe:
             grpc:
               port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 15
+            periodSeconds: 15
             timeoutSeconds: 5
             failureThreshold: 3
           startupProbe:
@@ -88,7 +100,7 @@ spec:
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 5
-            failureThreshold: 10
+            failureThreshold: 12
           lifecycle:
             preStop:
               exec:
