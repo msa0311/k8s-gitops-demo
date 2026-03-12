@@ -36,7 +36,7 @@ spec:
         prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: emailservice
-      terminationGracePeriodSeconds: 45
+      terminationGracePeriodSeconds: 60
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
