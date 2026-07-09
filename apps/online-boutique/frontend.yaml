@@ -55,7 +55,7 @@ spec:
         readinessProbe:
           initialDelaySeconds: 10
           httpGet:
-            path: /_healthz
+            path: /_healthzz
             port: 8080
             httpHeaders:
             - name: Cookie
@@ -63,7 +63,7 @@ spec:
         livenessProbe:
           initialDelaySeconds: 10
           httpGet:
-            path: /_healthz
+            path: /_healthzzz
             port: 8080
             httpHeaders:
             - name: Cookie
