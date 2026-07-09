@@ -17,7 +17,7 @@ spec:
       serviceAccountName: frontend
       containers:
       - name: server
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontendddd:v0.10.1
+        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.1
         ports:
         - containerPort: 8080
         env:
