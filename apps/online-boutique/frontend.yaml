@@ -6,9 +6,6 @@ metadata:
 spec:
   strategy:
     type: Recreate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
   selector:
     matchLabels:
       app: frontend
