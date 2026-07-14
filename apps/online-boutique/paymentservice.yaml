@@ -4,7 +4,7 @@ metadata:
   name: paymentservice
   namespace: online-boutique
 spec:
-  replicas: 2   # was 1 (default) - single OOM = 0 available
+  replicas: 3   # was 2 - +1 so a single OOM restart cannot drop below the alert threshold (paired with PDB minAvailable:2)
   selector:
     matchLabels:
       app: paymentservice
@@ -26,14 +26,14 @@ spec:
         - name: DISABLE_PROFILER
           value: "1"
         - name: NODE_OPTIONS
-          value: "--max-old-space-size=300"  # ~80% of 384Mi limit; GC before cgroup OOM
+          value: "--max-old-space-size=380"  # ~74% of 512Mi limit; GC before cgroup OOM, leaves headroom for native/GC/libuv/gRPC-core
         resources:
           requests:
             cpu: 100m
-            memory: 192Mi  # was 96Mi - Node.js heap grows under load
+            memory: 256Mi  # was 192Mi - Node.js heap grows under load
           limits:
             cpu: 200m
-            memory: 384Mi  # was 192Mi - OOMKilled 12x, no --max-old-space-size cap
+            memory: 512Mi  # was 384Mi - rev2 (384Mi/heap300) still OOMKilled 18:40Z; only ~84Mi headroom. Mirrors currencyservice 256->512Mi fix.
         # Startup probe: allows up to 45s for Node.js startup before liveness kicks in
         startupProbe:
           grpc:
@@ -67,3 +67,14 @@ spec:
   - name: grpc
     port: 50051
     targetPort: 50051
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: paymentservice
+  namespace: online-boutique
+spec:
+  minAvailable: 2   # with replicas:3, tolerate 1 disruption; keeps >=2 ready so an OOM restart never trips DemoDeploymentDown
+  selector:
+    matchLabels:
+      app: paymentservice
