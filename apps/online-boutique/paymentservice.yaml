@@ -29,10 +29,10 @@ spec:
           value: "--max-old-space-size=380"  # ~74% of 512Mi limit; GC before cgroup OOM, leaves headroom for native/GC/libuv/gRPC-core
         resources:
           requests:
-            cpu: 100m
+            cpu: 1000m  # DEMO: intentionally over-provisioned to exercise the right-sizer detector (actual usage ~1-4m)
             memory: 256Mi  # was 192Mi - Node.js heap grows under load
           limits:
-            cpu: 200m
+            cpu: 1000m  # DEMO: raised to keep request<=limit valid
             memory: 512Mi  # was 384Mi - rev2 (384Mi/heap300) still OOMKilled 18:40Z; only ~84Mi headroom. Mirrors currencyservice 256->512Mi fix.
         # Startup probe: allows up to 45s for Node.js startup before liveness kicks in
         startupProbe:
