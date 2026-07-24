@@ -28,8 +28,8 @@ spec:
           value: "1"
         resources:
           requests:
-            cpu: 100m
-            memory: 1024Mi
+            cpu: 18m
+            memory: 128Mi
           limits:
             cpu: 200m
             memory: 1024Mi  # Increased from 450Mi - Python ML libs need memory
