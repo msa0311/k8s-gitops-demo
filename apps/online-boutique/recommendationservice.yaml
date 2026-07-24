@@ -29,10 +29,10 @@ spec:
         resources:
           requests:
             cpu: 100m
-            memory: 220Mi
+            memory: 1024Mi
           limits:
             cpu: 200m
-            memory: 512Mi  # Increased from 450Mi - Python ML libs need memory
+            memory: 1024Mi  # Increased from 450Mi - Python ML libs need memory
         # Startup probe: allows up to 60s for Python imports before liveness kicks in
         startupProbe:
           grpc:
