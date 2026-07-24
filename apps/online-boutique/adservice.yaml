@@ -25,10 +25,10 @@ spec:
         resources:
           requests:
             cpu: 10m
-            memory: 180Mi
+            memory: 1024Mi
           limits:
             cpu: 300m
-            memory: 350Mi  # Increased from 300Mi - Java needs headroom
+            memory: 1024Mi  # Increased from 300Mi - Java needs headroom
         # Startup probe: allows up to 120s for JVM warmup before liveness kicks in
         startupProbe:
           grpc:
