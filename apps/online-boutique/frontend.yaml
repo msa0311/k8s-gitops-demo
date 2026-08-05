@@ -5,10 +5,7 @@ metadata:
   namespace: online-boutique
 spec:
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
+    type: Recreate
   selector:
     matchLabels:
       app: frontend
